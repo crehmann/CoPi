@@ -1,6 +1,7 @@
 const { lstat, readdir, realpath } = require("fs");
 const { join } = require("path");
 var pathIsInside = require("path-is-inside");
+const drivelist = require("drivelist");
 const AccessForbiddenError = require("./../errors/AccessForbiddenError");
 const NotFoundError = require("./../errors/NotFoundError");
 
@@ -28,20 +29,25 @@ const getFileInfo = path =>
 
 const getDrives = () =>
   new Promise(function(fulfilled, rejected) {
-    fulfilled([
-      {
-        device: "sda",
-        raw: "/dev/sda",
-        description: "Storage Device",
-        size: 31914983424,
-        mountpoints: [
-          {
-            path: "C:\\Temp"
-          }
-        ],
-        isReadOnly: false
+    drivelist.list((error, drives) => {
+      if (error) {
+        rejected(error);
+      } else {
+        fulfilled(
+          drives
+            .map(d => ({
+              device: d.device,
+              devicePath: d.devicePath,
+              description: d.description,
+              size: d.size,
+              mountpoints: d.mountpoints,
+              isReadOnly: d.isReadOnly,
+              isSystem: d.isSystem
+            }))
+            .filter(d => !d.isSystem)
+        );
       }
-    ]);
+    });
   });
 
 const getMountedDriveByDevice = async device => {
