@@ -1,12 +1,16 @@
-var express = require("express");
-var app = express();
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
+var app = require("express")();
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
+var socketService = require('./utils/SocketService');
+var driveController = require("./drive/DriveController");
+var copyJobController = require("./copyjob/CopyJobController");
 
-var DriveController = require("./drive/DriveController");
-var CopyJobController = require("./copyjob/CopyJobController");
+socketService.setIo(io)
 
-app.use("/drives", DriveController);
-app.use("/copyjobs", CopyJobController);
+app.use("/drives", driveController);
+app.use("/copyjobs", copyJobController);
+app.get('/', function (req, res) {
+    res.sendFile(__dirname + '/index.html');
+});
 
-module.exports = app;
+module.exports = server;
