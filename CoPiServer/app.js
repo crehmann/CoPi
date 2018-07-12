@@ -1,7 +1,7 @@
 var express = require("express");
 var app = express();
-
-var AppError = require("./errors/AppError");
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
 
 var DriveController = require("./drive/DriveController");
 var CopyJobController = require("./copyjob/CopyJobController");

@@ -16,5 +16,8 @@
     "path-is-inside": "^1.0.2",
     "rsync": "^0.6.1",
     "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "socket.io": "^2.1.1"
   }
 }
