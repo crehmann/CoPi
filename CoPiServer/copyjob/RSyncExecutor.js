@@ -35,4 +35,6 @@ const execute = (copyJobOptions) => {
     return new CopyJob(copyJobOptions, execution)
 }
 
-module.exports = { execute };
+const cancel = (copyJob) => copyJob.copyJobExecution.process.kill();;
+
+module.exports = { execute, cancel };

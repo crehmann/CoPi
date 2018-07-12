@@ -22,4 +22,6 @@ const execute = (copyJobOptions) => {
     return copyJob;
 }
 
-module.exports = { execute };
+const cancel = (copyJob) => { };
+
+module.exports = { execute, cancel };
