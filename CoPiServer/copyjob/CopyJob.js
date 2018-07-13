@@ -1,8 +1,6 @@
-const uuid = require('uuid/v1');
-
 class CopyJob {
-    constructor(copyJobOptions, copyJobExecution) {
-        this._id = uuid();
+    constructor(id, copyJobOptions, copyJobExecution) {
+        this._id = id;
         this._copyJobOptions = copyJobOptions;
         this._copyJobExecution = copyJobExecution;
     }
@@ -16,53 +14,73 @@ class CopyJob {
             id: this._id,
             source: this._copyJobOptions.source,
             destination: this._copyJobOptions.destination,
-            dryRun: this._copyJobOptions.dryRun,
+            flags: this._copyJobOptions.flags,
+            options: this._copyJobOptions.options,
             command: this._copyJobExecution.command,
             progress: this._copyJobExecution.progress,
-            files: this._copyJobExecution.files,
-            completed: this._copyJobExecution.completed,
+            state: this._copyJobExecution.state,
+            output: this._copyJobExecution.output,
             error: this._copyJobExecution.error
         };
     }
 }
 
 class CopyJobOptions {
-    constructor(source, destination, dryRun) {
+    constructor(source, destination, flags, options) {
         this._source = source;
         this._destination = destination;
-        this._dryRun = dryRun;
+        this._flags = flags;
+        this._options = options;
     }
 
     get source() { return this._source; }
     get destination() { return this._destination; }
-    get dryRun() { return this._dryRun; }
+    get flags() { return this._flags; }
+    get options() { return this._options; }
 }
 
 class CopyJobExecution {
     constructor(process, command) {
         this._process = process;
-        this._command = "";
+        this._command = command;
         this._progress = 0;
-        this._files = [];
-        this._completed = false;
+        this._output = [];
+        this._state = "open";
         this._error = null;
     }
 
     get process() { return this._process; }
     get command() { return this._command; }
     get progress() { return this._progress; }
-    get files() { return this._files; }
-    get completed() { return this._completed; }
+    get output() { return this._output; }
+    get state() { return this._state; }
     get error() { return this._error; }
 
     set progress(progress) { this._progress = progress; }
-    set completed(completed) { this._completed = completed; }
     set error(error) {
         this._error = error;
     }
 
-    appendFile(file) {
-        this._files.push(file);
+    setInProgress() {
+        this._state = "inProgress";
+    }
+
+    setCompleted() {
+        this._state = "completed";
+        this._progress = 100;
+    }
+
+    setCanceled() {
+        this._state = "canceled";
+    }
+
+    setFailed(error) {
+        this._error = error;
+        this._state = "failed";
+    }
+
+    appendOutput(line) {
+        this._output.push(line);
     }
 }
 

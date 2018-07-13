@@ -6,8 +6,8 @@ const AccessForbiddenError = require("./../errors/AccessForbiddenError");
 const NotFoundError = require("./../errors/NotFoundError");
 
 const readDirectory = source =>
-  new Promise(function(fulfilled, rejected) {
-    readdir(source, function(err, files) {
+  new Promise(function (fulfilled, rejected) {
+    readdir(source, function (err, files) {
       if (err) {
         rejected(err);
       } else {
@@ -17,8 +17,8 @@ const readDirectory = source =>
   });
 
 const getFileInfo = path =>
-  new Promise(function(fulfilled, rejected) {
-    lstat(path, function(err, stats) {
+  new Promise(function (fulfilled, rejected) {
+    lstat(path, function (err, stats) {
       if (err) {
         rejected(err);
       } else {
@@ -28,7 +28,7 @@ const getFileInfo = path =>
   });
 
 const getDrives = () =>
-  new Promise(function(fulfilled, rejected) {
+  new Promise(function (fulfilled, rejected) {
     drivelist.list((error, drives) => {
       if (error) {
         rejected(error);
@@ -87,8 +87,8 @@ const getDriveContent = async (device, directory) => {
 };
 
 const resolvePath = path =>
-  new Promise(function(fulfilled, rejected) {
-    realpath(path, function(err, resolvedPath) {
+  new Promise(function (fulfilled, rejected) {
+    realpath(path, function (err, resolvedPath) {
       if (err) {
         rejected(err);
       } else {
@@ -97,4 +97,4 @@ const resolvePath = path =>
     });
   });
 
-module.exports = { getDrives, getDriveContent };
+module.exports = { getDrives, getDriveContent, getMountedDriveByDevice };
