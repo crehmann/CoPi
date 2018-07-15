@@ -7,6 +7,7 @@ const socketService = require('../utils/SocketService');
 const execute = (copyJobOptions) => {
     const id = uuid();
     const rsync = new Rsync()
+        .executableShell('/bin/bash')
         .source(copyJobOptions.source)
         .destination(copyJobOptions.destination)
         .progress()
