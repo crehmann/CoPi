@@ -1,10 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const bodyParser = require("body-parser");
 const asyncHandler = require("express-async-handler");
 const Drive = require("./Drive");
 
-router.use(bodyParser.urlencoded({ extended: true }));
 router.get(
   "/",
   asyncHandler(async (req, res, next) => {

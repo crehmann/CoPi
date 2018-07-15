@@ -7,34 +7,30 @@ const copyJobs = [];
 
 const getAll = () => copyJobs.map(x => x.toDto());
 
-const get = (id) => {
+const get = (id) => find(id).toDto();
+
+const createAndExecute = async (sourceDevice, destinationDevice, flags, options) => {
+    const sourcePath = await drive.getFirstMountpointOfDevice(sourceDevice);
+    const destPath = await drive.getFirstMountpointOfDevice(destinationDevice);
+    const copyJobOptions = new CopyJobOptions(sourcePath, destPath, flags, options);
+    const copyJob = rSyncExecutor.execute(copyJobOptions)
+    copyJobs.push(copyJob);
+    return Promise.resolve(copyJob.toDto());
+};
+
+const remove = (id) => {
+    const copyJob = find(id);
+    copyJobs.splice(copyJobs.indexOf(copyJob), 1);
+};
+
+const cancel = (id) => {
+    rSyncExecutor.cancel(find(id));
+}
+
+const find = (id) => {
     const copyJob = copyJobs.find(function (x) { return x.id === id });
     if (copyJob === undefined) throw new NotFoundError();
     return copyJob;
 }
 
-const createAndExecute = (sourceDevice, destinationDevice, flags, options) => {
-    //const sourcePath = drive.getMountedDriveByDevice(sourceDevice);
-    //onst destPath = drive.getMountedDriveByDevice(destinationDevice);
-    const copyJobOptions = new CopyJobOptions(sourceDevice, destinationDevice, flags, options);
-    const copyJob = rSyncExecutor.execute(copyJobOptions)
-    copyJobs.push(copyJob);
-    return copyJob.toDto();
-};
-
-const remove = (id) => {
-    const copyJob = copyJobs.find(function (x) { return x.id === id });
-    var index = copyJobs.indexOf(copyJob);
-    if (index > -1) {
-        copyJobs.splice(index, 1);
-    } else {
-        throw new NotFoundError();
-    }
-};
-
-const cancel = (id) => {
-    rSyncExecutor.cancel(get(id));;
-}
-
-
-module.exports = { getAll, get, createAndExecute, remove };
+module.exports = { getAll, get, createAndExecute, remove, cancel };

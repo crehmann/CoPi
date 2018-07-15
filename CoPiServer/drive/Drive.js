@@ -50,20 +50,10 @@ const getDrives = () =>
     });
   });
 
-const getMountedDriveByDevice = async device => {
-  var drives = await getDrives();
-  return (
-    drives.find(
-      drive => drive.device === device && drive.mountpoints.length > 0
-    ) || Promise.reject(new NotFoundError())
-  );
-};
-
 const getDriveContent = async (device, directory) => {
   var drive = await getMountedDriveByDevice(device);
-  var resolvedPath = await resolvePath(
-    join(drive.mountpoints[0].path, directory)
-  );
+  var mountpoint = await getFirstMountpointOfDevice(drive);
+  var resolvedPath = await resolvePath(join(mountpoint, directory));
 
   if (!pathIsInside(resolvedPath, drive.mountpoints[0].path)) {
     throw new AccessForbiddenError();
@@ -86,6 +76,19 @@ const getDriveContent = async (device, directory) => {
   );
 };
 
+const getFirstMountpointOfDevice = async device => {
+  var drives = await getDrives();
+  return new Promise(function (fulfilled, reject) {
+    var drive = drives.find(drive => drive.device === device && drive.mountpoints.length > 0);
+    if (drive) {
+      fulfilled(drive.mountpoints[0]);
+    } else {
+      reject(new NotFoundError())
+    }
+
+  })
+}
+
 const resolvePath = path =>
   new Promise(function (fulfilled, rejected) {
     realpath(path, function (err, resolvedPath) {
@@ -97,4 +100,4 @@ const resolvePath = path =>
     });
   });
 
-module.exports = { getDrives, getDriveContent, getMountedDriveByDevice };
+module.exports = { getDrives, getDriveContent, getFirstMountpointOfDevice };
