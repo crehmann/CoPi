@@ -18,12 +18,19 @@ const getDriveContent = async (device, directory) => {
     files.map(async file => {
       const info = await getFileInfo(join(resolvedPath, file));
       if (info.isDirectory()) {
-        return { name: file, isDirectory: true };
+        return {
+          name: file,
+          isDirectory: true,
+          birthtime: info.birthtime,
+          mtimeMs: info.mtimeMs
+        };
       } else {
         return {
           name: file,
           isDirectory: false,
-          size: info.size
+          size: info.size,
+          birthtime: info.birthtime,
+          mtimeMs: info.mtimeMs
         };
       }
     })
