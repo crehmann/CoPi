@@ -5,30 +5,58 @@ const drivelist = require("drivelist");
 const AccessForbiddenError = require("./../errors/AccessForbiddenError");
 const NotFoundError = require("./../errors/NotFoundError");
 
-const readDirectory = source =>
-  new Promise(function (fulfilled, rejected) {
-    readdir(source, function (err, files) {
-      if (err) {
-        rejected(err);
-      } else {
-        fulfilled(files);
-      }
-    });
-  });
+const getDriveContent = async (device, directory) => {
+  var mountpoint = await getFirstMountpointOfDevice(device);
+  var resolvedPath = await resolvePath(join(mountpoint, directory));
 
-const getFileInfo = path =>
-  new Promise(function (fulfilled, rejected) {
-    lstat(path, function (err, stats) {
-      if (err) {
-        rejected(err);
+  if (!pathIsInside(resolvedPath, mountpoint)) {
+    throw new AccessForbiddenError();
+  }
+
+  var files = await readDirectory(resolvedPath);
+  return await Promise.all(
+    files.map(async file => {
+      const info = await getFileInfo(join(resolvedPath, file));
+      if (info.isDirectory()) {
+        return { name: file, isDirectory: true };
       } else {
-        fulfilled(stats);
+        return {
+          name: file,
+          isDirectory: false,
+          size: info.size
+        };
       }
-    });
+    })
+  );
+};
+
+const getAbsolutFilePath = async (device, filePath) => {
+  var mountpoint = await getFirstMountpointOfDevice(device);
+  var resolvedPath = await resolvePath(join(mountpoint, filePath));
+
+  if (!pathIsInside(resolvedPath, mountpoint)) {
+    throw new AccessForbiddenError();
+  }
+
+  return Promise.resolve(resolvedPath);
+};
+
+const getFirstMountpointOfDevice = async device => {
+  var drives = await getDrives();
+  return new Promise(function(fulfilled, reject) {
+    var drive = drives.find(
+      drive => drive.device === device && drive.mountpoints.length > 0
+    );
+    if (drive) {
+      fulfilled(drive.mountpoints[0]);
+    } else {
+      reject(new NotFoundError());
+    }
   });
+};
 
 const getDrives = () =>
-  new Promise(function (fulfilled, rejected) {
+  new Promise(function(fulfilled, rejected) {
     drivelist.list((error, drives) => {
       if (error) {
         rejected(error);
@@ -50,48 +78,31 @@ const getDrives = () =>
     });
   });
 
-const getDriveContent = async (device, directory) => {
-  var drive = await getMountedDriveByDevice(device);
-  var mountpoint = await getFirstMountpointOfDevice(drive);
-  var resolvedPath = await resolvePath(join(mountpoint, directory));
-
-  if (!pathIsInside(resolvedPath, drive.mountpoints[0].path)) {
-    throw new AccessForbiddenError();
-  }
-
-  var files = await readDirectory(resolvedPath);
-  return await Promise.all(
-    files.map(async file => {
-      const info = await getFileInfo(join(resolvedPath, file));
-      if (info.isDirectory()) {
-        return { name: file, isDirectory: true };
+const readDirectory = source =>
+  new Promise(function(fulfilled, rejected) {
+    readdir(source, function(err, files) {
+      if (err) {
+        rejected(err);
       } else {
-        return {
-          name: file,
-          isDirectory: false,
-          size: info.size
-        };
+        fulfilled(files);
       }
-    })
-  );
-};
+    });
+  });
 
-const getFirstMountpointOfDevice = async device => {
-  var drives = await getDrives();
-  return new Promise(function (fulfilled, reject) {
-    var drive = drives.find(drive => drive.device === device && drive.mountpoints.length > 0);
-    if (drive) {
-      fulfilled(drive.mountpoints[0]);
-    } else {
-      reject(new NotFoundError())
-    }
-
-  })
-}
+const getFileInfo = path =>
+  new Promise(function(fulfilled, rejected) {
+    lstat(path, function(err, stats) {
+      if (err) {
+        rejected(err);
+      } else {
+        fulfilled(stats);
+      }
+    });
+  });
 
 const resolvePath = path =>
-  new Promise(function (fulfilled, rejected) {
-    realpath(path, function (err, resolvedPath) {
+  new Promise(function(fulfilled, rejected) {
+    realpath(path, function(err, resolvedPath) {
       if (err) {
         rejected(err);
       } else {
@@ -100,4 +111,9 @@ const resolvePath = path =>
     });
   });
 
-module.exports = { getDrives, getDriveContent, getFirstMountpointOfDevice };
+module.exports = {
+  getDrives,
+  getDriveContent,
+  getFirstMountpointOfDevice,
+  getAbsolutFilePath
+};
