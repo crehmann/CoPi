@@ -7,7 +7,7 @@ router.get(
   "/",
   asyncHandler(async (req, res, next) => {
     res.download(
-      await drive.getAbsolutFilePath(req.query.device, req.query.path)
+      await drive.getAbsoluteFilePath(req.query.device, req.query.path)
     );
   })
 );

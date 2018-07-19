@@ -37,7 +37,7 @@ const getDriveContent = async (device, directory) => {
   );
 };
 
-const getAbsolutFilePath = async (device, filePath) => {
+const getAbsoluteFilePath = async (device, filePath) => {
   var mountpoint = await getFirstMountpointOfDevice(device);
   var resolvedPath = await resolvePath(join(mountpoint, filePath));
 
@@ -122,5 +122,5 @@ module.exports = {
   getDrives,
   getDriveContent,
   getFirstMountpointOfDevice,
-  getAbsolutFilePath
+  getAbsoluteFilePath
 };
