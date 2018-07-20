@@ -30,7 +30,16 @@ const getDriveContent = async (device, directory) => {
           isDirectory: false,
           size: info.size,
           birthtime: info.birthtime,
-          mtimeMs: info.mtimeMs
+          mtimeMs: info.mtimeMs,
+          ...(true // todo use condition
+            ? {
+                preview:
+                  "/preview?device=" +
+                  device +
+                  "&path=" +
+                  join(resolvedPath, file)
+              }
+            : {})
         };
       }
     })
