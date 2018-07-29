@@ -5,8 +5,8 @@ const drivelist = require("drivelist");
 const AccessForbiddenError = require("./../errors/AccessForbiddenError");
 const NotFoundError = require("./../errors/NotFoundError");
 
-const getDriveContent = async (device, directory) => {
-  var mountpoint = await getFirstMountpointOfDevice(device);
+const getDriveContent = async (devicePath, directory) => {
+  var mountpoint = await getFirstMountpointOfDevicePath(devicePath);
   var resolvedPath = await resolvePath(join(mountpoint, directory));
 
   if (!pathIsInside(resolvedPath, mountpoint)) {
@@ -21,7 +21,7 @@ const getDriveContent = async (device, directory) => {
         return {
           name: file,
           isDirectory: true,
-          birthtime: info.birthtime,
+          birthtime: info.birthtimeMs,
           mtimeMs: info.mtimeMs
         };
       } else {
@@ -29,7 +29,7 @@ const getDriveContent = async (device, directory) => {
           name: file,
           isDirectory: false,
           size: info.size,
-          birthtime: info.birthtime,
+          birthtime: info.birthtimeMs,
           mtimeMs: info.mtimeMs
         };
       }
@@ -37,8 +37,8 @@ const getDriveContent = async (device, directory) => {
   );
 };
 
-const getAbsoluteFilePath = async (device, filePath) => {
-  var mountpoint = await getFirstMountpointOfDevice(device);
+const getAbsoluteFilePath = async (devicePath, filePath) => {
+  var mountpoint = await getFirstMountpointOfDevicePath(devicePath);
   var resolvedPath = await resolvePath(join(mountpoint, filePath));
 
   if (!pathIsInside(resolvedPath, mountpoint)) {
@@ -48,11 +48,11 @@ const getAbsoluteFilePath = async (device, filePath) => {
   return Promise.resolve(resolvedPath);
 };
 
-const getFirstMountpointOfDevice = async device => {
+const getFirstMountpointOfDevicePath = async devicePath => {
   var drives = await getDrives();
   return new Promise(function(fulfilled, reject) {
     var drive = drives.find(
-      drive => drive.device === device && drive.mountpoints.length > 0
+      drive => drive.devicePath === devicePath && drive.mountpoints.length > 0
     );
     if (drive) {
       fulfilled(drive.mountpoints[0]);
@@ -121,6 +121,6 @@ const resolvePath = path =>
 module.exports = {
   getDrives,
   getDriveContent,
-  getFirstMountpointOfDevice,
+  getFirstMountpointOfDevicePath,
   getAbsoluteFilePath
 };
