@@ -1,7 +1,6 @@
 const { CopyJobOptions } = require("./CopyJob");
 const NotFoundError = require("./../errors/NotFoundError");
 const rSyncExecutor = require("./RSyncExecutor");
-const demoExecutor = require("./DemoExecutor");
 const drive = require("../drive/Drive");
 const copyJobs = [];
 

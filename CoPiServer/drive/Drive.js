@@ -1,9 +1,12 @@
 const { lstat, readdir, realpath } = require("fs");
-const { join } = require("path");
-var pathIsInside = require("path-is-inside");
+const { join, extname } = require("path");
+const pathIsInside = require("path-is-inside");
 const drivelist = require("drivelist");
 const AccessForbiddenError = require("./../errors/AccessForbiddenError");
 const NotFoundError = require("./../errors/NotFoundError");
+
+const supportedPreviewRawExtensions = [".CR2", ".NEF"];
+const supportedPreviewImageExtensions = [".JPG", ".JPEG", "PNG", ".BMP"];
 
 const getDriveContent = async (devicePath, directory) => {
   var mountpoint = await getFirstMountpointOfDevicePath(devicePath);
@@ -29,8 +32,16 @@ const getDriveContent = async (devicePath, directory) => {
           name: file,
           isDirectory: false,
           size: info.size,
-          birthtime: info.birthtimeMs,
-          mtimeMs: info.mtimeMs
+          birthtimeMs: info.birthtimeMs,
+          mtimeMs: info.mtimeMs,
+          downloadLink:
+            "/download?device=" +
+            encodeURIComponent(devicePath) +
+            "&path=" +
+            encodeURIComponent(join(directory, file)),
+          previewLink: supportsPreview(file)
+            ? buildPreviewLink(devicePath, join(directory, file))
+            : undefined
         };
       }
     })
@@ -117,6 +128,30 @@ const resolvePath = path =>
       }
     });
   });
+
+const supportsPreview = file => {
+  const fileExtension = extname(file).toUpperCase();
+  return (
+    supportedPreviewImageExtensions.indexOf(fileExtension) > -1 ||
+    supportedPreviewRawExtensions.indexOf(fileExtension) > 1
+  );
+};
+
+const buildPreviewLink = (devicePath, filePath) => {
+  const fileExtension = extname(filePath).toUpperCase();
+  const previewType =
+    supportedPreviewImageExtensions.indexOf(fileExtension) > -1
+      ? "image"
+      : "raw";
+  return (
+    "/preview/" +
+    previewType +
+    "?device=" +
+    encodeURIComponent(devicePath) +
+    "&path=" +
+    encodeURIComponent(filePath)
+  );
+};
 
 module.exports = {
   getDrives,
