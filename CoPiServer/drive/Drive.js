@@ -133,7 +133,7 @@ const supportsPreview = file => {
   const fileExtension = extname(file).toUpperCase();
   return (
     supportedPreviewImageExtensions.indexOf(fileExtension) > -1 ||
-    supportedPreviewRawExtensions.indexOf(fileExtension) > 1
+    supportedPreviewRawExtensions.indexOf(fileExtension) > -1
   );
 };
 
