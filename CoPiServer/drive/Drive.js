@@ -90,7 +90,7 @@ const getDrives = () =>
               isReadOnly: d.isReadOnly,
               isSystem: d.isSystem
             }))
-            .filter(d => !d.isSystem && dmountpoints.length > 0)
+            .filter(d => !d.isSystem && d.mountpoints.length > 0)
         );
       }
     });
