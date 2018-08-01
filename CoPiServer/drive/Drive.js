@@ -66,7 +66,7 @@ const getFirstMountpointOfDevicePath = async devicePath => {
       drive => drive.devicePath === devicePath && drive.mountpoints.length > 0
     );
     if (drive) {
-      fulfilled(drive.mountpoints[0]);
+      fulfilled(drive.mountpoints[0].path);
     } else {
       reject(new NotFoundError());
     }
@@ -90,7 +90,7 @@ const getDrives = () =>
               isReadOnly: d.isReadOnly,
               isSystem: d.isSystem
             }))
-            .filter(d => !d.isSystem)
+            .filter(d => !d.isSystem && dmountpoints.length > 0)
         );
       }
     });
