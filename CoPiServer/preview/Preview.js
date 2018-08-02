@@ -23,7 +23,7 @@ const resize = (buffer, size) => {
 const extractRaw = async (device, filePath) => {
   const abosluteFilePath = await drive.getAbsoluteFilePath(device, filePath);
   return new Promise((resolve, reject) => {
-    exiv2.getImagePreviews(filePath, function(err, previews) {
+    exiv2.getImagePreviews(abosluteFilePath, function(err, previews) {
       if (err) {
         reject(err);
       } else {
