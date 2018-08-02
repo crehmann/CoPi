@@ -10,9 +10,8 @@ router.get(
       req.query.device,
       req.query.path
     );
-    const resizedImage = await preview.resize(previewImage, "400x400");
     res.set("Content-Type", "media/jpg");
-    res.write(resizedImage, "binary");
+    res.write(previewImage, "binary");
     res.end(null, "binary");
   })
 );

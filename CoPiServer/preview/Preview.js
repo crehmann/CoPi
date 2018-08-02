@@ -27,7 +27,7 @@ const extractRaw = async (device, filePath) => {
       if (err) {
         reject(err);
       } else {
-        resolve(previews[previews.size - 1]);
+        resolve(previews[0]);
       }
     });
   });
