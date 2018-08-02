@@ -1,6 +1,6 @@
 const sharp = require("sharp");
 const drive = require("../drive/Drive");
-const spawn = require("cross-spawn");
+const exiv2 = require("exiv2");
 
 const resize = (buffer, size) => {
   return new Promise(resolve => {
@@ -22,24 +22,13 @@ const resize = (buffer, size) => {
 
 const extractRaw = async (device, filePath) => {
   const abosluteFilePath = await drive.getAbsoluteFilePath(device, filePath);
-
   return new Promise((resolve, reject) => {
-    const exif = spawn("exiftool", ["-b", "-previewimage", abosluteFilePath], {
-      stdio: "pipe"
-    });
-    const buffers = [];
-
-    exif.stdout.on("data", data => buffers.push(data));
-    exif.stderr.on("data", err => reject(err.toString()));
-
-    exif.on("close", code => {
-      if (code !== 0) {
-        const error = new Error(`exiftool ended with code ${code}`);
-        return reject(error);
+    exiv2.getImagePreviews("./photo.jpg", function(err, previews) {
+      if (err) {
+        reject(err);
+      } else {
+        resize(previews[previews.size - 1]);
       }
-
-      const buffer = Buffer.concat(buffers);
-      return resolve(buffer);
     });
   });
 };
