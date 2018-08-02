@@ -75,26 +75,25 @@ const getFirstMountpointOfDevicePath = async devicePath => {
 
 const getDrives = () =>
   new Promise(function(fulfilled, rejected) {
-    fulfilled([
-      {
-        device: "sda",
-        devicePath: "sda",
-        description: "sda",
-        mountpoints: [{ path: "/mnt/c/Temp/BottomSheet" }],
-        size: 15000000,
-        isReadOnly: false,
-        isSystem: false
-      },
-      {
-        device: "sdb",
-        devicePath: "sdb",
-        description: "sdb",
-        mountpoints: [{ path: "/mnt/c/Temp/dest" }],
-        size: 16000000,
-        isReadOnly: false,
-        isSystem: false
+    drivelist.list((error, drives) => {
+      if (error) {
+        rejected(error);
+      } else {
+        fulfilled(
+          drives
+            .map(d => ({
+              device: d.device,
+              devicePath: d.devicePath,
+              description: d.description,
+              size: d.size,
+              mountpoints: d.mountpoints,
+              isReadOnly: d.isReadOnly,
+              isSystem: d.isSystem
+            }))
+            .filter(d => !d.isSystem)
+        );
       }
-    ]);
+    });
   });
 
 const readDirectory = source =>
