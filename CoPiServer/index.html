@@ -11,14 +11,20 @@
         <span id="progress">0</span>%
     </div>
 </body>
-<script src="/socket.io/socket.io.js"></script>
 <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
 <script>
     $(function () {
-        var socket = io();
-        socket.on('copyJobProgress', function (msg) {
-            $('#progress').text(msg.progress);
-        });
+
+        var wsCtor = window['MozWebSocket'] ? MozWebSocket : WebSocket;
+        this.socket = new wsCtor("ws://localhost:3000");
+
+        this.socket.onmessage = function (message) {
+            var messageData = JSON.parse(message.data);
+            if (messageData.subject === "copyJobProgress") {
+                $('#progress').text(messageData.data.progress);
+            }
+        };
+
     });
 
 </script>
