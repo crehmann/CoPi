@@ -1,4 +1,5 @@
 const { CopyJobOptions } = require("./CopyJob");
+const { join } = require("path");
 const NotFoundError = require("./../errors/NotFoundError");
 const rSyncExecutor = require("./RSyncExecutor");
 const drive = require("../drive/Drive");
@@ -21,7 +22,7 @@ const createAndExecute = async (
     destinationDevicePath
   );
   const copyJobOptions = new CopyJobOptions(
-    sourcePath,
+    join(sourcePath, "/"),
     destPath,
     flags,
     options

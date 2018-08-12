@@ -3,8 +3,6 @@ const uuid = require("uuid/v1");
 
 const { CopyJob, CopyJobExecution } = require("./CopyJob");
 const socketService = require("../utils/SocketService");
-const newLineRegExp = new RegExp("(?:\r\n|\r|\n)", "g");
-const percentageRegExp = new RegExp("(d{1,3})%", "g");
 
 const execute = copyJobOptions => {
   const id = uuid();
@@ -25,6 +23,10 @@ const execute = copyJobOptions => {
   const execution = new CopyJobExecution(
     rsync.execute(
       (error, code, cmd) => {
+        console.log("error:" + error);
+        console.log("code:" + code);
+        console.log("cmd:" + cmd);
+
         if (error) {
           execution.setFailed(error);
         } else {
@@ -41,21 +43,30 @@ const execute = copyJobOptions => {
 
         const lines = Buffer.from(data)
           .toString("utf8")
-          .split(newLineRegExp);
+          .split(new RegExp("(?:\r\n|\r|\n)", "g"));
+
         for (let i = 0; i < lines.length; i++) {
-          if (lines[i] === "") continue;
-          const matches = percentageRegExp.exec(lines[i]);
+          const line = lines[i];
+
+          if (line === "") continue;
+
+          const matches = /(\d{1,3})%/g.exec(line);
 
           if (matches && matches.length >= 2) {
             execution.progress = parseInt(matches[1]);
+            console.log("Match:" + parseInt(matches[1]));
             socketService.emit("copyJobProgress", {
               id: id,
-              progress: execution.progress
+              progress: execution.progress,
+              state: execution.state
             });
           } else {
-            execution.appendOutput(lines[i]);
+            execution.appendOutput(line);
           }
         }
+      },
+      errorStream => {
+        execution.appendError(Buffer.from(errorStream).toString("utf8"));
       }
     ),
     command

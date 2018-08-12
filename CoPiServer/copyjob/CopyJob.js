@@ -60,7 +60,7 @@ class CopyJobExecution {
     this._progress = 0;
     this._output = [];
     this._state = "inProgress";
-    this._error = null;
+    this._error = [];
   }
 
   get process() {
@@ -85,9 +85,6 @@ class CopyJobExecution {
   set progress(progress) {
     this._progress = progress;
   }
-  set error(error) {
-    this._error = error;
-  }
 
   setInProgress() {
     this._state = "inProgress";
@@ -103,12 +100,16 @@ class CopyJobExecution {
   }
 
   setFailed(error) {
-    this._error = error;
+    this._error.push(error);
     this._state = "failed";
   }
 
   appendOutput(line) {
     this._output.push(line);
+  }
+
+  appendError(error) {
+    this._error.push(error);
   }
 }
 
